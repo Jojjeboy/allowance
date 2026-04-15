@@ -14,9 +14,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['logo.png', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Vue Firebase Boilerplate',
-        short_name: 'VueBoiler',
-        description: 'A minimalist Vue 3 Boilerplate with Firebase Auth',
+        name: 'Allowance App',
+        short_name: 'Allowance',
+        description: 'A Allowance app with Vue 3 and Firebase Auth',
         theme_color: '#ffffff',
         icons: [
           {
@@ -33,7 +33,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: '/boiler/',
+  base: '/allowance/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

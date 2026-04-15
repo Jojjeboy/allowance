@@ -1,5 +1,5 @@
 {
-  "name": "boiler",
+  "name": "allowance",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -17,7 +17,8 @@
     "lint": "eslint . --fix --cache",
     "validate": "run-s lint type-check test:ci build-only",
     "format": "prettier --write --experimental-cli src/",
-    "generate-env": "node scripts/generate-env.js"
+    "generate-env": "node scripts/generate-env.js",
+    "rename-app": "node scripts/rename-app.js"
   },
   "dependencies": {
     "firebase": "^12.6.0",
