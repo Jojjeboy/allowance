@@ -12,7 +12,7 @@ export default defineConfig({
     vueDevTools(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['logo.png', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['allowance_icon.png', 'logo.png'],
       manifest: {
         name: 'Lias veckopeng',
         short_name: 'Veckopeng',
