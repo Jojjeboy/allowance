@@ -14,10 +14,14 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['logo.png', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Allowance App',
-        short_name: 'Allowance',
-        description: 'A Allowance app with Vue 3 and Firebase Auth',
-        theme_color: '#ffffff',
+        name: 'Lias veckopeng',
+        short_name: 'Veckopeng',
+        description: 'Håll koll på din veckopeng – spendera, spara och ge! 💜',
+        theme_color: '#a855f7',
+        background_color: '#fdf4ff',
+        display: 'standalone',
+        orientation: 'portrait',
+        lang: 'sv',
         icons: [
           {
             src: 'img/icons/pwa-192x192.png',
@@ -28,6 +32,26 @@ export default defineConfig({
             src: 'img/icons/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
+          },
+          {
+            src: 'img/icons/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
           },
         ],
       },

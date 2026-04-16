@@ -1,5 +1,4 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -7,8 +6,33 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      name: 'dashboard',
+      component: () => import('../views/DashboardView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/dreams',
+      name: 'dreams',
+      component: () => import('../views/DreamsView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/hero',
+      name: 'hero',
+      component: () => import('../views/HeroView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/history',
+      name: 'history',
+      component: () => import('../views/HistoryView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('../views/AdminView.vue'),
+      meta: { requiresAuth: true },
     },
     {
       path: '/login',
@@ -19,10 +43,9 @@ const router = createRouter({
 })
 
 // Navigation Guard
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore()
 
-  // Wait for auth to init if not already
   if (authStore.loading) {
     await authStore.initAuth()
   }
@@ -33,7 +56,7 @@ router.beforeEach(async (to, from, next) => {
   if (!isPublic && !isAuthenticated) {
     next('/login')
   } else if (isPublic && isAuthenticated) {
-    next('/') // Redirect to home if already logged in and trying to access login
+    next('/')
   } else {
     next()
   }
