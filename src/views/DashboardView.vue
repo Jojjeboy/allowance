@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAllowanceStore } from '@/stores/allowance'
 import { useThemeStore } from '@/stores/theme'
@@ -11,8 +11,6 @@ const allowance = useAllowanceStore()
 const theme = useThemeStore()
 
 useWeeklyDeposit()
-
-const showPaydayBanner = ref(false)
 
 const greeting = computed(() => {
   const hour = new Date().getHours()

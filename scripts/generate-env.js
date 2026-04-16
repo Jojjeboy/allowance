@@ -29,7 +29,7 @@ try {
     // A bit hacky but safe since it's a local dev script
     firebaseConfig = new Function('return ' + match[0])();
   }
-} catch (err) {
+} catch {
   console.error(`❌ Could not read or parse ${configPath}. Please ensure it contains your javascript const.`);
   process.exit(1);
 }
@@ -55,7 +55,7 @@ function getEnvPrefix() {
       if (deps['@vue/cli-service']) return 'VUE_APP_';
       if (deps['svelte']) return 'VITE_'; 
     }
-  } catch (error) {
+  } catch {
     // Ignore error
   }
   return ''; 

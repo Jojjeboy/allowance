@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { useThemeStore } from '@/stores/theme'
 import { useAllowanceStore } from '@/stores/allowance'
 import { useDreamsStore } from '@/stores/dreams'
 import { useAuthStore } from '@/stores/auth'
@@ -8,7 +7,6 @@ import BottomNav from '@/components/BottomNav.vue'
 import { computed, watch } from 'vue'
 
 const route = useRoute()
-const themeStore = useThemeStore()
 const allowanceStore = useAllowanceStore()
 const dreamsStore = useDreamsStore()
 const authStore = useAuthStore()

@@ -5,9 +5,6 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
-  arrayUnion,
-  serverTimestamp,
   Timestamp,
 } from 'firebase/firestore'
 
@@ -162,10 +159,8 @@ export const useAllowanceStore = defineStore('allowance', () => {
     const friday = new Date(now)
     friday.setHours(16, 0, 0, 0)
     const day = friday.getDay() // 0=Sun, 5=Fri
-    const diff = (day <= 5 ? 5 - day : 5 - day + 7)
     friday.setDate(friday.getDate() - (day === 5 ? 0 : day < 5 ? day - 5 + 7 : day - 5))
     // Simpler: get days since last Monday, go back to Friday
-    const daysBack = ((now.getDay() + 1) % 7) + 1 // Mon=0 ... Sun=6 in ISO
     const lastFriday = new Date(now)
     lastFriday.setDate(now.getDate() - ((now.getDay() + 2) % 7))
     lastFriday.setHours(16, 0, 0, 0)

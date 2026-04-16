@@ -22,7 +22,11 @@ const grouped = computed(() => {
   const thisWeek = getWeekStart(now)
   const lastWeek = thisWeek - 7 * 24 * 60 * 60 * 1000
 
-  const buckets: Record<string, typeof allowance.transactions> = {
+  const buckets: {
+    thisWeek: typeof allowance.transactions
+    lastWeek: typeof allowance.transactions
+    older: typeof allowance.transactions
+  } = {
     thisWeek: [],
     lastWeek: [],
     older: [],

@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { BucketType } from '@/stores/allowance'
 
-const { t, n } = useI18n()
+const { t } = useI18n()
 
 interface Props {
   bucket: BucketType

@@ -75,7 +75,7 @@ export const useDreamsStore = defineStore('dreams', () => {
   async function updateDream(id: string, updates: Partial<Dream>) {
     const idx = dreams.value.findIndex((d) => d.id === id)
     if (idx !== -1) {
-      dreams.value[idx] = { ...dreams.value[idx], ...updates }
+      dreams.value[idx] = { ...dreams.value[idx], ...updates } as Dream
       await sync()
     }
   }

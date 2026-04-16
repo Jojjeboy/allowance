@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import type { Transaction, BucketType } from '@/stores/allowance'
-
-const { t } = useI18n()
 
 interface Props {
   transaction: Transaction

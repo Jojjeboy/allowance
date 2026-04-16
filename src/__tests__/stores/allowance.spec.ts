@@ -23,7 +23,6 @@ vi.mock('firebase/firestore', () => ({
 import { useAllowanceStore } from '@/stores/allowance'
 
 // Helpers to manipulate "now" in shouldDepositThisWeek
-const RealDate = globalThis.Date
 
 function setMockDate(iso: string) {
   vi.useFakeTimers()

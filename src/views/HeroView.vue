@@ -131,7 +131,7 @@ async function confirmDonate() {
           />
         </div>
         <p class="text-xs mt-1.5 opacity-80 font-medium">
-          {{ Math.min(100, giveBalance.toFixed(0)) }} / 100 kr för donation
+          {{ Math.min(100, giveBalance).toFixed(0) }} / 100 kr för donation
         </p>
       </div>
 
