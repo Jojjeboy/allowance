@@ -1,120 +1,105 @@
-# .
+# 💰 Lias veckopeng
 
-This template should help get you started developing with Vue 3 in Vite.
+En premium, mobil-först Progressive Web App (PWA) designad för att göra hantering av veckopeng rolig, lärorik och givande. Byggd med en estetik som blandar spelvärlden med banktjänster, hjälper den barn att lära sig om att spendera, ge och spara inför sina drömmar.
 
-## Recommended IDE Setup
+---
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 🌟 Upplevelsen
 
-## Recommended Browser Setup
+### För barnet (Lia)
+Appen är designad för att vara färgstark, interaktiv och uppmuntrande:
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+*   **De tre hinkarna**: 
+    *   🛍️ **Spendera**: Pengar för veckans nöjen och godsaker.
+    *   🎁 **Ge bort**: Pengar för att hjälpa andra (t.ex. Hundstallet, WWF, Barncancerfonden).
+    *   🏦 **Spara**: Pengar som läggs undan för långsiktiga sparmål.
+*   **Automatisk lönedag**: Varje fredag kl. 16:00 sätter appen automatiskt in veckopengen (60 kr uppdelat som 40/10/10) med en firande animation.
+*   **Drömmål**: Skapa "Drömmar" med egna bilder och målsättningar. Se framstegsmätaren fyllas i takt med att **Spara**-hinken växer.
+*   **Hjältedonations**: När **Ge bort**-hinken når 100 kr låses en speciell donationsknapp upp med beskrivningar av vilken skillnad pengarna gör för den valda välgörenhetsorganisationen.
+*   **Visuell glädje**: Konfettiregn vid lönedag, bekräftade donationer och när ett drömmål nås till 100%.
+*   **Fullständig historik**: En skrollbar lista över alla transaktioner grupperade per vecka.
+*   **Mörkt läge**: En snygg inställning för användning under kvällstid.
 
-## Type Support for `.vue` Imports in TS
+### För föräldern
+Föräldern behåller kontrollen genom ett dolt admin-gränssnitt:
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+*   **Dolt admin-tillträde**: Nås via `/admin`-routen eller kugghjulsikonen i instrumentpanelen.
+*   **PIN-skydd**: Skyddas av en enkel 4-siffrig PIN-kod (`1234` som standard) för att förhindra oavsiktliga ändringar.
+*   **Justering av saldo**: Lägg till eller dra av pengar manuellt från valfri hink (t.ex. vid utförda sysslor eller större inköp).
+*   **Återställ timer**: Återställ veckotimern vid behov för testning eller manuell synkronisering.
 
-## Customize configuration
+---
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## 🏗️ Teknisk arkitektur
 
-## Project Setup
+### Teknikstack
+-   **Frontend**: [Vue 3](https://vuejs.org/) (Composition API) + [Vite](https://vitejs.dev/)
+-   **Styling**: [Tailwind CSS v3](https://tailwindcss.com/)
+-   **Tillstånd (State)**: [Pinia](https://pinia.vuejs.org/) med modulär butiksstruktur
+-   **Backend**: [Firebase Firestore](https://firebase.google.com/docs/firestore) för data & [Auth](https://firebase.google.com/docs/auth) för säkerhet
+-   **Persistens**: [VueUse](https://vueuse.org/) `useLocalStorage` för robust offline-stöd
+-   **PWA**: [Vite PWA Plugin](https://vite-pwa-org.netlify.app/) för installerbarhet och service workers
+-   **Animationer**: [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
+-   **Lokalisering**: [vue-i18n](https://vue-i18n.intlify.dev/) (Svenska som modersmål)
 
-```sh
-npm install
-```
+### Butiksstruktur (Stores)
+-   `allowance.ts`: Hanterar saldon i hinkar, transaktioner och logik för insättningar.
+-   `dreams.ts`: Hanterar sparmål och bilddata (lagras som base64).
+-   `theme.ts`: Hanterar persistens för ljust/mörkt läge.
+-   `auth.ts`: Hanterar Firebase-inloggning.
 
-## Quick Start
+### Strategi för synkronisering
+Appen använder en **Write-Through Cache**-strategi:
+1.  Allt tillstånd sparas omedelbart i `localStorage` för omedelbar respons offline.
+2.  Asynkron synkronisering till Firestore sker i bakgrunden.
+3.  Vid appstart laddas data först från `localStorage` (snabbt), och uppdateras sedan från Firestore (pålitligt).
 
-1. **Set up your Firebase configuration:**
-   - Copy the `firebaseConfig` object from your Firebase console.
-   - Paste it into `scripts/pasted_secret_config.js`.
-   - Run `npm run generate-env` to create/update your `.env` file.
+---
 
-2. **Start the development server:**
-   ```sh
-   npm run dev
-   ```
+## 🚀 Installation & Utveckling
 
-@todo: implement next step https://medium.com/@guilhermehenrique_23468/streamlining-github-secrets-management-with-a-bash-script-8b757a047e0e
-### Compile and Hot-Reload for Development
+### Förutsättningar
+-   Node.js (v20+ rekommenderas)
+-   Ett Firebase-projekt
 
+### Installation
+1.  Klona lagringsplatsen och installera beroenden:
+    ```sh
+    npm install
+    ```
+2.  **Firebase-konfiguration**: 
+    -   Kopiera ditt konfigurationsobjekt från Firebase Console.
+    -   Klistra in det i `scripts/pasted_secret_config.js`.
+    -   Kör hjälpskriptet för att generera `.env`-filen:
+        ```sh
+        npm run generate-env
+        ```
+
+### Utveckling
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
-
+### Testning & Validering
+Projektet använder en strikt valideringspipeline:
 ```sh
-npm run build
+npm run validate   # Kör Lint -> Type-check -> Unit Tests -> Build
 ```
-
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
-<br />
-<br />
-
-
-### Adding your Firebase configuration
-
-Rather than typing the variables by hand, you can simply copy the `firebaseConfig`
-object from the Firebase console (usually the snippet that starts with
-`const firebaseConfig = {...}`) and paste it into
-`scripts/pasted_secret_config.js` in the root of this project. The file is
-already ignored by Git so your secrets won't be committed.
-
-Once pasted, run the helper script to generate a `.env` file with the
-correct keys:
-
-```sh
-npm run generate-env      # or node scripts/generate-env.js
-```
-
-The script will detect your framework (Vite, Next, CRA, etc.) and prefix the
-variables appropriately. It will update an existing `.env` or create one if
-needed.
-
-After running it you should see output like:
-
-```
-✅ Read config from scripts/pasted_secret_config.js and updated .env!
-   - VITE_FIREBASE_API_KEY
-   - VITE_FIREBASE_AUTH_DOMAIN
-   - …
-```
-
-The resulting `.env` will contain the values you need, e.g.:  
-```sh
-VITE_FIREBASE_API_KEY=AAA-BBB
-VITE_FIREBASE_AUTH_DOMAIN=your-app.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your-app
-…
-```
-
-You can now start the dev server as usual (`npm run dev`).
+-   **Enhetstester**: `npm run test:unit` (Vitest). Inkluderar fullständiga mockar för Firebase och tidskritisk logik för insättningar.
+-   **Typ-kontroll**: `npm run type-check` (vue-tsc).
+-   **Linting**: `npm run lint` (ESLint).
 
 ---
 
-### Add a .env file with this content
-```sh
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_AUTH_DOMAIN=.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=
-VITE_FIREBASE_STORAGE_BUCKET=.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=
-VITE_FIREBASE_APP_ID=
-```
+## 🔮 Framtida planer & idéer
+
+*   **Sysslosystem**: En dedikerad flik för "Uppgifter" där Lia kan tjäna extra pengar genom att slutföra överenskomna sysslor hemma.
+*   **Ränta**: Små månatliga "räntebonusar" i **Spara**-hinken för att lära ut kraften i ränta-på-ränta.
+*   **Fotogalleri**: Ett sätt att arkivera uppfyllda drömmar med ett foto på den faktiska prylen när den väl är inköpt.
+*   **Rösthälsningar**: Integration med en lokal AI-modell för att ge uppmuntrande rösthälsningar eller "ekonomitips" med en rolig röst.
+*   **Budgetplanering**: Ett enkelt verktyg för att "öronmärka" pengar inom Spendera-hinken för specifika kommande händelser (t.ex. bio med kompisar).
+*   **Flera barn**: Möjlighet för föräldrar att växla mellan olika barnprofiler med separata saldon.
+
+---
+
+*Skapad med ❤️ till Lia.*
