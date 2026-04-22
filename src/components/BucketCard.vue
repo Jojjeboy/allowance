@@ -75,7 +75,10 @@ const c = computed(() => config[props.bucket])
         {{ balance.toFixed(0) }}
         <span class="text-2xl font-bold opacity-80 ml-1">kr</span>
       </div>
-      <div class="text-sm opacity-70 mt-1 font-medium">Tillgängligt saldo</div>
+      <div class="text-sm opacity-70 mt-1 font-medium">
+        <span v-if="t(c.labelKey) !== 'Ge bort'">Tillgängligt saldo</span>
+        <span v-if="t(c.labelKey) === 'Ge bort'">Saldo att ge bort</span>
+      </div>
     </div>
   </div>
 </template>
