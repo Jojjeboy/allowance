@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAllowanceStore, type BucketType } from '@/stores/allowance'
 import { useAuthStore } from '@/stores/auth'
@@ -26,29 +26,44 @@ function submitPin() {
   }
 }
 
-// Adjust form
-const selectedBucket = ref<BucketType>('spend')
-const adjustAmount = ref<number | ''>('')
-const adjustNote = ref('')
-const successMsg = ref('')
+// Watch for the panel opening so we can seed the input values
+watch(unlocked, (val) => { if (val) initEditBalances() })
 
+// Adjust form — one input per bucket, pre-filled with current balance
 const bucketOptions: { key: BucketType; label: string; emoji: string }[] = [
   { key: 'spend', label: 'Spendera', emoji: '🛍️' },
   { key: 'give', label: 'Ge bort', emoji: '🎁' },
   { key: 'save', label: 'Spara', emoji: '🏦' },
 ]
 
-async function adjust(type: 'add' | 'deduct') {
-  if (!adjustAmount.value) return
-  const amount = Number(adjustAmount.value)
-  const delta = type === 'add' ? amount : -amount
-  const desc = adjustNote.value
-    ? adjustNote.value
-    : type === 'add' ? 'Manuell påfyllnad' : 'Manuellt avdrag'
-  await allowance.adjustBucket(selectedBucket.value, delta, desc, adjustNote.value || undefined)
-  successMsg.value = t('admin.success')
-  adjustAmount.value = ''
+// Local editable copies, initialised once the panel opens
+const editBalances = ref<Record<BucketType, number | ''>>({ spend: '', give: '', save: '' })
+const adjustNote = ref('')
+const successMsg = ref('')
+
+function initEditBalances() {
+  editBalances.value = {
+    spend: allowance.buckets.spend,
+    give: allowance.buckets.give,
+    save: allowance.buckets.save,
+  }
+}
+
+async function saveBalances() {
+  for (const b of bucketOptions) {
+    const newVal = Number(editBalances.value[b.key])
+    if (!isNaN(newVal)) {
+      const delta = newVal - allowance.buckets[b.key]
+      if (delta !== 0) {
+        const desc = adjustNote.value
+          ? adjustNote.value
+          : delta > 0 ? 'Manuell påfyllnad' : 'Manuellt avdrag'
+        await allowance.adjustBucket(b.key, delta, desc, adjustNote.value || undefined)
+      }
+    }
+  }
   adjustNote.value = ''
+  successMsg.value = t('admin.success')
   setTimeout(() => (successMsg.value = ''), 2500)
 }
 
@@ -110,7 +125,7 @@ async function handleLogout() {
     <div v-else class="flex flex-col gap-5">
       <!-- Current balances -->
       <div class="rounded-3xl bg-white/10 backdrop-blur border border-white/10 p-5">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-purple-300 mb-4">Aktuella saldon</h2>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-purple-300 mb-4">{{ t('admin.currentBalances') }}</h2>
         <div class="grid grid-cols-3 gap-3">
           <div v-for="b in bucketOptions" :key="b.key" class="text-center">
             <div class="text-2xl mb-1">{{ b.emoji }}</div>
@@ -125,59 +140,36 @@ async function handleLogout() {
       <div class="rounded-3xl bg-white/10 backdrop-blur border border-white/10 p-5">
         <h2 class="text-xs font-bold uppercase tracking-widest text-purple-300 mb-4">{{ t('admin.adjust') }}</h2>
 
-        <!-- Bucket selector -->
-        <div class="flex gap-2 mb-4">
-          <button
+        <!-- One input per bucket, pre-filled with current balance -->
+        <div class="flex flex-col gap-3 mb-4">
+          <div
             v-for="b in bucketOptions"
             :key="b.key"
-            :id="`admin-bucket-${b.key}`"
-            @click="selectedBucket = b.key"
-            class="flex-1 py-2 rounded-2xl text-sm font-semibold border transition-all"
-            :class="selectedBucket === b.key
-              ? 'bg-purple-500 border-purple-400 text-white'
-              : 'border-white/20 text-white/60 hover:border-white/40'"
+            class="flex items-center gap-3"
           >
-            {{ b.emoji }} {{ b.label }}
-          </button>
+            <span class="text-2xl w-8 text-center">{{ b.emoji }}</span>
+            <label :for="`admin-balance-${b.key}`" class="w-20 text-sm font-semibold text-white/70">{{ b.label }}</label>
+            <div class="relative flex-1">
+              <input
+                :id="`admin-balance-${b.key}`"
+                v-model.number="editBalances[b.key]"
+                type="number"
+                min="0"
+                class="w-full rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/30 px-4 py-3 pr-10 font-bold text-lg focus:outline-none focus:border-purple-400 transition"
+              />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-medium pointer-events-none">kr</span>
+            </div>
+          </div>
         </div>
 
-        <!-- Amount -->
-        <input
-          id="admin-amount-input"
-          v-model="adjustAmount"
-          type="number"
-          min="1"
-          :placeholder="t('admin.amountPlaceholder')"
-          class="w-full rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/30 px-4 py-3 font-medium focus:outline-none focus:border-purple-400 transition mb-3"
-        />
-
-        <!-- Note -->
-        <input
-          id="admin-note-input"
-          v-model="adjustNote"
-          :placeholder="t('admin.notePlaceholder')"
-          class="w-full rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/30 px-4 py-3 font-medium focus:outline-none focus:border-purple-400 transition mb-4"
-        />
-
-        <!-- Add / Deduct buttons -->
-        <div class="flex gap-3">
-          <button
-            id="admin-add-btn"
-            @click="adjust('add')"
-            :disabled="!adjustAmount"
-            class="flex-1 py-3 rounded-2xl bg-green-500 text-white font-bold hover:bg-green-600 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all"
-          >
-            {{ t('admin.addMoney') }}
-          </button>
-          <button
-            id="admin-deduct-btn"
-            @click="adjust('deduct')"
-            :disabled="!adjustAmount"
-            class="flex-1 py-3 rounded-2xl bg-pink-500 text-white font-bold hover:bg-pink-600 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all"
-          >
-            {{ t('admin.deductMoney') }}
-          </button>
-        </div>
+        <!-- Save button -->
+        <button
+          id="admin-save-btn"
+          @click="saveBalances"
+          class="w-full py-3 rounded-2xl bg-purple-500 text-white font-bold hover:bg-purple-600 active:scale-95 transition-all"
+        >
+          💾 {{ t('admin.saveChanges') }}
+        </button>
       </div>
 
       <!-- Reset timer -->
