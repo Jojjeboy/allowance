@@ -41,6 +41,8 @@ const editBalances = ref<Record<BucketType, number | ''>>({ spend: '', give: '',
 const adjustNote = ref('')
 const successMsg = ref('')
 
+const days = [0, 1, 2, 3, 4, 5, 6]
+
 function initEditBalances() {
   editBalances.value = {
     spend: allowance.buckets.spend,
@@ -170,6 +172,24 @@ async function handleLogout() {
         >
           💾 {{ t('admin.saveChanges') }}
         </button>
+      </div>
+
+      <!-- Payout Settings -->
+      <div class="rounded-3xl bg-white/10 backdrop-blur border border-white/10 p-5">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-purple-300 mb-4">{{ t('admin.payday') }}</h2>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="day in days"
+            :key="day"
+            @click="allowance.depositDay = day; allowance.persist()"
+            class="flex-1 min-w-[80px] py-2.5 rounded-2xl text-xs font-bold transition-all border"
+            :class="allowance.depositDay === day
+              ? 'bg-purple-500 border-purple-400 text-white shadow-lg shadow-purple-500/20'
+              : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:border-white/20'"
+          >
+             {{ t(`admin.days.${day}`) }}
+          </button>
+        </div>
       </div>
 
       <!-- Reset timer -->
