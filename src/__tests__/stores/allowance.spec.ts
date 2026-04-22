@@ -158,25 +158,31 @@ describe('useAllowanceStore', () => {
 
   // ── shouldDepositThisWeek ─────────────────────────────────────────────────
 
-  it('returns true when lastDeposit is null', () => {
+  it('returns true when lastDeposit is null and date is on or after start date', () => {
+    setMockDate('2026-05-01T10:00:00') // Friday, May 1st (after 08:00 start)
     const store = useAllowanceStore()
     expect(store.lastDeposit).toBeNull()
     expect(store.shouldDepositThisWeek()).toBe(true)
   })
 
-  it('returns false when lastDeposit is after the most recent Friday 16:00', () => {
-    // Simulate: "now" is Saturday (day after payday), lastDeposit = yesterday (Friday) after 16:00
-    setMockDate('2026-04-18T10:00:00') // Saturday
-    // Pre-seed localStorage so the store initialises with a known lastDeposit
-    localStorage.setItem('lia_last_deposit', JSON.stringify('2026-04-17T17:00:00.000Z'))
+  it('returns false when date is before start date', () => {
+    setMockDate('2026-04-20T10:00:00') // Before May 1st start
     const store = useAllowanceStore()
     expect(store.shouldDepositThisWeek()).toBe(false)
   })
 
-  it('returns true when lastDeposit predates the most recent Friday 16:00', () => {
+  it('returns false when lastDeposit is after the most recent Friday 08:00', () => {
+    // Simulate: "now" is Saturday after payday, lastDeposit = yesterday (Friday) after 08:00
+    setMockDate('2026-05-02T10:00:00') // Saturday
+    localStorage.setItem('lia_last_deposit', JSON.stringify('2026-05-01T09:00:00.000Z'))
+    const store = useAllowanceStore()
+    expect(store.shouldDepositThisWeek()).toBe(false)
+  })
+
+  it('returns true when lastDeposit predates the most recent Friday 08:00', () => {
     // now = Monday after payday, last deposit was two weeks ago
-    setMockDate('2026-04-20T09:00:00') // Monday
-    localStorage.setItem('lia_last_deposit', JSON.stringify('2026-04-03T17:00:00.000Z'))
+    setMockDate('2026-05-04T09:00:00') // Monday
+    localStorage.setItem('lia_last_deposit', JSON.stringify('2026-04-19T09:00:00.000Z'))
     const store = useAllowanceStore()
     expect(store.shouldDepositThisWeek()).toBe(true)
   })

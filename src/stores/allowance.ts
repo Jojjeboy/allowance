@@ -28,6 +28,10 @@ export interface Buckets {
 const LS_BUCKETS = 'lia_buckets'
 const LS_TRANSACTIONS = 'lia_transactions'
 const LS_LAST_DEPOSIT = 'lia_last_deposit'
+const LS_START_DATE = 'lia_start_date'
+
+// Allowance starts from May 1st, 2026 on Saturdays
+const ALLOWANCE_START_DATE = '2026-05-01'
 
 function uid(): string {
   return auth.currentUser?.uid ?? 'anonymous'
@@ -54,6 +58,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
   const buckets = ref<Buckets>(loadLocal(LS_BUCKETS, { spend: 0, give: 0, save: 0 }))
   const transactions = ref<Transaction[]>(loadLocal(LS_TRANSACTIONS, []))
   const lastDeposit = ref<string | null>(loadLocal(LS_LAST_DEPOSIT, null))
+  const startDate = ref<string>(loadLocal(LS_START_DATE, ALLOWANCE_START_DATE))
   const loading = ref(false)
 
   const totalBalance = computed(() => buckets.value.spend + buckets.value.give + buckets.value.save)
@@ -66,12 +71,14 @@ export const useAllowanceStore = defineStore('allowance', () => {
         const data = snap.data()
         buckets.value = data.buckets ?? { spend: 0, give: 0, save: 0 }
         transactions.value = data.transactions ?? []
+        startDate.value = data.startDate ?? ALLOWANCE_START_DATE
         if (data.lastDeposit instanceof Timestamp) {
           lastDeposit.value = data.lastDeposit.toDate().toISOString()
         }
         saveLocal(LS_BUCKETS, buckets.value)
         saveLocal(LS_TRANSACTIONS, transactions.value)
         saveLocal(LS_LAST_DEPOSIT, lastDeposit.value)
+        saveLocal(LS_START_DATE, startDate.value)
       }
     } catch {
       // offline – use localStorage (already loaded above)
@@ -88,6 +95,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
           buckets: buckets.value,
           transactions: transactions.value,
           lastDeposit: lastDeposit.value ? Timestamp.fromDate(new Date(lastDeposit.value)) : null,
+          startDate: startDate.value,
         },
         { merge: true },
       )
@@ -100,6 +108,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
     saveLocal(LS_BUCKETS, buckets.value)
     saveLocal(LS_TRANSACTIONS, transactions.value)
     saveLocal(LS_LAST_DEPOSIT, lastDeposit.value)
+    saveLocal(LS_START_DATE, startDate.value)
     syncFirestore()
   }
 
@@ -151,20 +160,27 @@ export const useAllowanceStore = defineStore('allowance', () => {
   }
 
   function shouldDepositThisWeek(): boolean {
-    if (!lastDeposit.value) return true
-    const last = new Date(lastDeposit.value)
     const now = new Date()
+    const start = new Date(startDate.value)
 
-    // Find the most recent Friday at 16:00
-    const friday = new Date(now)
-    friday.setHours(16, 0, 0, 0)
-    const day = friday.getDay() // 0=Sun, 5=Fri
-    friday.setDate(friday.getDate() - (day === 5 ? 0 : day < 5 ? day - 5 + 7 : day - 5))
-    // Simpler: get days since last Monday, go back to Friday
+    // Don't deposit before the start date
+    if (now < start) {
+      return false
+    }
+
+    // If no deposit yet and we're past the start date, allow first deposit
+    if (!lastDeposit.value) {
+      return true
+    }
+
+    // Find the most recent Friday at 08:00
     const lastFriday = new Date(now)
-    lastFriday.setDate(now.getDate() - ((now.getDay() + 2) % 7))
-    lastFriday.setHours(16, 0, 0, 0)
+    const day = lastFriday.getDay() // 0=Sun, 5=Fri
+    const daysBack = day === 5 ? 0 : (day + 2) % 7 === 0 ? 1 : (7 - day + 5) % 7
+    lastFriday.setDate(lastFriday.getDate() - daysBack)
+    lastFriday.setHours(8, 0, 0, 0)
 
+    const last = new Date(lastDeposit.value)
     return now >= lastFriday && last < lastFriday
   }
 
@@ -172,6 +188,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
     buckets,
     transactions,
     lastDeposit,
+    startDate,
     loading,
     totalBalance,
     load,

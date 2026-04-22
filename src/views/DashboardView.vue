@@ -19,20 +19,69 @@ const greeting = computed(() => {
   return '🌙 God kväll, Lia!'
 })
 
-const nextFriday = computed(() => {
+const nextDepositDays = computed(() => {
   const now = new Date()
+  const startDate = new Date(allowance.startDate)
+
+  // If before start date (May 1st), calculate days to start date
+  if (now < startDate) {
+    const msUntilStart = startDate.getTime() - now.getTime()
+    return Math.ceil(msUntilStart / (1000 * 60 * 60 * 24))
+  }
+
+  // After start date: find next Friday at 08:00
   const day = now.getDay() // 0=Sun, 5=Fri
-  let daysUntil = (5 - day + 7) % 7
-  // If it's Friday before 16:00, show "today"
-  if (day === 5 && now.getHours() < 16) daysUntil = 0
-  else if (day === 5) daysUntil = 7 // already paid today, next is in 7 days
-  return daysUntil
+
+  // If it's Friday before 08:00, show "today"
+  if (day === 5 && now.getHours() < 8) return 0
+
+  // Calculate days until next Friday
+  let daysUntilFriday = (5 - day + 7) % 7
+
+  // If it's already Friday (after 08:00) or later in the week, next Friday is 7 days away
+  if (day === 5 && now.getHours() >= 8) {
+    daysUntilFriday = 7
+  } else if (daysUntilFriday === 0) {
+    // Today is Friday but before 08:00, show 0
+    // (handled above)
+  }
+
+  return daysUntilFriday
+})
+
+const nextDepositDate = computed(() => {
+  const now = new Date()
+  const startDate = new Date(allowance.startDate)
+
+  // If before start date, use start date
+  if (now < startDate) {
+    return startDate
+  }
+
+  // Calculate next Friday at 08:00
+  const day = now.getDay() // 0=Sun, 5=Fri
+  const nextFriday = new Date(now)
+  let daysUntilFriday = (5 - day + 7) % 7
+
+  if (day === 5 && now.getHours() >= 8) {
+    daysUntilFriday = 7
+  } else if (day === 5 && now.getHours() < 8) {
+    daysUntilFriday = 0
+  }
+
+  nextFriday.setDate(nextFriday.getDate() + daysUntilFriday)
+  return nextFriday
+})
+
+const weekdayName = computed(() => {
+  const weekdays = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
+  return weekdays[nextDepositDate.value.getDay()]
 })
 
 const paydayLabel = computed(() => {
-  if (nextFriday.value === 0) return t('dashboard.today')
-  if (nextFriday.value === 1) return t('dashboard.tomorrow')
-  return t('dashboard.inDays', { days: nextFriday.value })
+  if (nextDepositDays.value === 0) return t('dashboard.today')
+  if (nextDepositDays.value === 1) return t('dashboard.tomorrow')
+  return t('dashboard.inDays', { days: nextDepositDays.value })
 })
 </script>
 
@@ -63,7 +112,7 @@ const paydayLabel = computed(() => {
             {{ t('dashboard.nextPayday') }}
           </p>
           <p class="text-sm font-bold text-purple-700 dark:text-purple-300">
-            {{ paydayLabel }} · +60 kr
+            {{ paydayLabel }} · {{ weekdayName }} · +60 kr
           </p>
         </div>
         <router-link
