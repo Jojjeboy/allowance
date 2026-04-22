@@ -39,8 +39,11 @@
     box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
   }
 
-  /* Safe area for bottom nav */
+  /* Safe areas for iOS PWA */
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0px);
   }
 }

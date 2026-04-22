@@ -82,7 +82,7 @@ async function handleLogout() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-950 to-gray-900 pb-10 px-5 pt-12">
+  <div class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-950 to-gray-900 pb-10 px-5 pt-[calc(3rem+env(safe-area-inset-top,0px))]">
     <!-- Header -->
     <div class="flex items-center justify-between mb-8">
       <div>
@@ -189,6 +189,25 @@ async function handleLogout() {
           >
              {{ t(`admin.days.${day}`) }}
           </button>
+        </div>
+      </div>
+
+      <!-- Donation Settings -->
+      <div class="rounded-3xl bg-white/10 backdrop-blur border border-white/10 p-5">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-purple-300 mb-4">{{ t('admin.donationGoal') }}</h2>
+        <div class="flex items-center gap-3">
+          <div class="relative flex-1">
+            <input
+              id="admin-donation-threshold"
+              v-model.number="allowance.donationThreshold"
+              type="number"
+              min="1"
+              @change="allowance.persist()"
+              class="w-full rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/30 px-4 py-3 pr-10 font-bold text-lg focus:outline-none focus:border-purple-400 transition"
+              :placeholder="t('admin.donationGoalPlaceholder')"
+            />
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-medium pointer-events-none">kr</span>
+          </div>
         </div>
       </div>
 

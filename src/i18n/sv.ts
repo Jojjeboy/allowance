@@ -116,6 +116,9 @@ export default {
     saveChanges: 'Spara ändringar',
     payday: 'Hämta veckopeng på',
     paydayLabel: 'Veckodag',
+    donationGoal: 'Mål för donation',
+    donationGoalLabel: 'Belopp (kr)',
+    donationGoalPlaceholder: 'T.ex. 100',
     days: {
       0: 'Sön',
       1: 'Mån',

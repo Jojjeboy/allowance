@@ -27,8 +27,8 @@ function selectCharity(key: CharityKey) {
 }
 
 const giveBalance = computed(() => allowance.buckets.give)
-const canDonate = computed(() => giveBalance.value >= 100)
-const remaining = computed(() => Math.max(0, 100 - giveBalance.value))
+const canDonate = computed(() => giveBalance.value >= allowance.donationThreshold)
+const remaining = computed(() => Math.max(0, allowance.donationThreshold - giveBalance.value))
 
 const impactText = computed(() => {
   const key = `hero.impacts.${selectedCharity.value}`
@@ -72,7 +72,7 @@ async function confirmDonate() {
     <ConfettiEffect ref="confetti" />
 
     <!-- Header -->
-    <div class="px-5 pt-12 pb-4">
+    <div class="px-5 pb-4 pt-[calc(3rem+env(safe-area-inset-top,0px))]">
       <h1 class="text-2xl font-black text-gray-900 dark:text-white">{{ t('hero.title') }}</h1>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ t('hero.subtitle') }}</p>
     </div>
@@ -127,11 +127,11 @@ async function confirmDonate() {
         <div class="h-3 rounded-full bg-white/20 overflow-hidden">
           <div
             class="h-full rounded-full bg-white transition-all duration-700"
-            :style="{ width: Math.min(100, giveBalance) + '%' }"
+            :style="{ width: Math.min(100, (giveBalance / allowance.donationThreshold) * 100) + '%' }"
           />
         </div>
         <p class="text-xs mt-1.5 opacity-80 font-medium">
-          {{ Math.min(100, giveBalance).toFixed(0) }} / 100 kr för donation
+          {{ giveBalance.toFixed(0) }} / {{ allowance.donationThreshold }} kr för donation
         </p>
       </div>
 

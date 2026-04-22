@@ -30,6 +30,7 @@ const LS_TRANSACTIONS = 'lia_transactions'
 const LS_LAST_DEPOSIT = 'lia_last_deposit'
 const LS_START_DATE = 'lia_start_date'
 const LS_DEPOSIT_DAY = 'lia_deposit_day'
+const LS_DONATION_THRESHOLD = 'lia_donation_threshold'
 
 // Allowance starts from May 1st, 2026 on Saturdays
 const ALLOWANCE_START_DATE = '2026-05-01'
@@ -61,6 +62,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
   const lastDeposit = ref<string | null>(loadLocal(LS_LAST_DEPOSIT, null))
   const startDate = ref<string>(loadLocal(LS_START_DATE, ALLOWANCE_START_DATE))
   const depositDay = ref<number>(loadLocal(LS_DEPOSIT_DAY, 5)) // 0=Sun, 5=Fri
+  const donationThreshold = ref<number>(loadLocal(LS_DONATION_THRESHOLD, 100))
   const loading = ref(false)
 
   const totalBalance = computed(() => buckets.value.spend + buckets.value.give + buckets.value.save)
@@ -75,6 +77,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
         transactions.value = data.transactions ?? []
         startDate.value = data.startDate ?? ALLOWANCE_START_DATE
         depositDay.value = data.depositDay ?? 5
+        donationThreshold.value = data.donationThreshold ?? 100
         if (data.lastDeposit instanceof Timestamp) {
           lastDeposit.value = data.lastDeposit.toDate().toISOString()
         }
@@ -83,6 +86,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
         saveLocal(LS_LAST_DEPOSIT, lastDeposit.value)
         saveLocal(LS_DEPOSIT_DAY, depositDay.value)
         saveLocal(LS_START_DATE, startDate.value)
+        saveLocal(LS_DONATION_THRESHOLD, donationThreshold.value)
       }
     } catch {
       // offline – use localStorage (already loaded above)
@@ -101,6 +105,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
           lastDeposit: lastDeposit.value ? Timestamp.fromDate(new Date(lastDeposit.value)) : null,
           startDate: startDate.value,
           depositDay: depositDay.value,
+          donationThreshold: donationThreshold.value,
         },
         { merge: true },
       )
@@ -115,6 +120,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
     saveLocal(LS_LAST_DEPOSIT, lastDeposit.value)
     saveLocal(LS_START_DATE, startDate.value)
     saveLocal(LS_DEPOSIT_DAY, depositDay.value)
+    saveLocal(LS_DONATION_THRESHOLD, donationThreshold.value)
     syncFirestore()
   }
 
@@ -196,6 +202,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
     lastDeposit,
     startDate,
     depositDay,
+    donationThreshold,
     loading,
     totalBalance,
     load,

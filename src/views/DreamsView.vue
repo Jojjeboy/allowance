@@ -73,7 +73,7 @@ async function confirmDelete(id: string) {
     <ConfettiEffect ref="confetti" />
 
     <!-- Header -->
-    <div class="px-5 pt-12 pb-2">
+    <div class="px-5 pb-2 pt-[calc(3rem+env(safe-area-inset-top,0px))]">
       <h1 class="text-2xl font-black text-gray-900 dark:text-white">{{ t('dreams.title') }}</h1>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ t('dreams.subtitle') }}</p>
 

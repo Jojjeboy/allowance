@@ -88,7 +88,7 @@ const paydayLabel = computed(() => {
 <template>
   <div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50 dark:from-gray-950 dark:via-purple-950/20 dark:to-gray-950 pb-24">
     <!-- Header -->
-    <div class="px-5 pt-12 pb-2">
+    <div class="px-5 pb-2 pt-[calc(3rem+env(safe-area-inset-top,0px))]">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-black text-gray-900 dark:text-white">{{ greeting }}</h1>
