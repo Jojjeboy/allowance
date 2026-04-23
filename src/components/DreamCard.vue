@@ -63,9 +63,9 @@ const isComplete = computed(() => progress.value >= 100)
             {{ dream.name }}
           </h3>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            {{ saveBalance.toFixed(0) }} {{ t('common.kr') }}
+            {{ saveBalance.toFixed(2) }} {{ t('common.kr') }}
             <span class="opacity-60">{{ t('dreams.of') }}</span>
-            {{ dream.targetAmount }} {{ t('common.kr') }}
+            {{ dream.targetAmount.toFixed(2) }} {{ t('common.kr') }}
           </p>
         </div>
         <span

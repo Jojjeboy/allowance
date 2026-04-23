@@ -52,7 +52,7 @@ const formattedDate = computed(() => {
         ? 'text-purple-600 dark:text-purple-400'
         : 'text-pink-600 dark:text-pink-400'"
     >
-      {{ isCredit ? '+' : '' }}{{ transaction.amount }} kr
+      {{ isCredit ? '+' : '' }}{{ transaction.amount.toFixed(2) }} kr
     </div>
   </div>
 </template>

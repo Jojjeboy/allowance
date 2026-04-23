@@ -134,7 +134,7 @@ const paydayLabel = computed(() => {
     <div class="mx-5 mt-5 rounded-2xl bg-white/60 dark:bg-gray-800/60 backdrop-blur border border-purple-100 dark:border-purple-900/30 px-5 py-4 flex items-center justify-between">
       <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">Totalt saldo</span>
       <span class="text-xl font-black text-purple-700 dark:text-purple-300 tabular-nums">
-        {{ allowance.totalBalance.toFixed(0) }} kr
+        {{ allowance.totalBalance.toFixed(2) }} kr
       </span>
     </div>
   </div>

@@ -79,7 +79,7 @@ async function confirmDelete(id: string) {
 
       <!-- Save balance indicator -->
       <div class="mt-3 inline-flex items-center gap-2 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 rounded-full px-4 py-1.5 text-sm font-semibold border border-yellow-200 dark:border-yellow-800/30">
-        🏦 {{ allowance.buckets.save.toFixed(0) }} kr tillgängligt att spara
+        🏦 {{ allowance.buckets.save.toFixed(2) }} kr tillgängligt att spara
       </div>
     </div>
 

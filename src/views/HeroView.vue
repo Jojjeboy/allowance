@@ -118,7 +118,7 @@ async function confirmDonate() {
 
       <!-- Balance display -->
       <div class="flex items-baseline gap-2 mb-4">
-        <span class="text-4xl font-black tabular-nums">{{ giveBalance.toFixed(0) }}</span>
+        <span class="text-4xl font-black tabular-nums">{{ giveBalance.toFixed(2) }}</span>
         <span class="text-xl font-bold opacity-80">kr</span>
       </div>
 
@@ -131,7 +131,7 @@ async function confirmDonate() {
           />
         </div>
         <p class="text-xs mt-1.5 opacity-80 font-medium">
-          {{ giveBalance.toFixed(0) }} / {{ allowance.donationThreshold }} kr för donation
+          {{ giveBalance.toFixed(2) }} / {{ allowance.donationThreshold.toFixed(2) }} kr för donation
         </p>
       </div>
 
@@ -183,7 +183,7 @@ async function confirmDonate() {
           </h2>
           <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">
             {{ t('hero.donateConfirmText', {
-              amount: giveBalance.toFixed(0),
+              amount: giveBalance.toFixed(2),
               charity: t(`hero.charities.${selectedCharity}`)
             }) }}
           </p>

@@ -114,6 +114,35 @@ describe('useAllowanceStore', () => {
     expect(store.transactions).toHaveLength(2)
   })
 
+  // ── depositExtra ──────────────────────────────────────────────────────────
+
+  it('depositExtra distributes amount in 40:10:10 ratio', async () => {
+    const store = useAllowanceStore()
+    await store.depositExtra(30, 'Extra for chores')
+    expect(store.buckets.spend).toBe(20) // 30 * 40/60 = 20
+    expect(store.buckets.give).toBe(5)  // 30 * 10/60 = 5
+    expect(store.buckets.save).toBe(5)  // 30 * 10/60 = 5
+  })
+
+  it('depositExtra creates a transaction entry with custom description', async () => {
+    const store = useAllowanceStore()
+    await store.depositExtra(45, 'Bonus for cleaning room')
+    expect(store.transactions).toHaveLength(1)
+    expect(store.transactions[0].description).toBe('Bonus for cleaning room')
+    expect(store.transactions[0].amount).toBe(45)
+    expect(store.transactions[0].note).toContain('Extra deposit:')
+  })
+
+  it('depositExtra accumulates with existing balances', async () => {
+    const store = useAllowanceStore()
+    await store.depositWeekly() // 40/10/10
+    await store.depositExtra(30, 'Extra') // +20/5/5
+    expect(store.buckets.spend).toBe(60)
+    expect(store.buckets.give).toBe(15)
+    expect(store.buckets.save).toBe(15)
+    expect(store.transactions).toHaveLength(2)
+  })
+
   // ── adjustBucket ──────────────────────────────────────────────────────────
 
   it('adjustBucket increases a bucket balance', async () => {

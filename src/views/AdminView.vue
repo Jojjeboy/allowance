@@ -41,6 +41,10 @@ const editBalances = ref<Record<BucketType, number | ''>>({ spend: '', give: '',
 const adjustNote = ref('')
 const successMsg = ref('')
 
+// Extra deposit form
+const extraAmount = ref('')
+const extraDescription = ref('')
+
 const days = [0, 1, 2, 3, 4, 5, 6]
 
 function initEditBalances() {
@@ -69,6 +73,19 @@ async function saveBalances() {
   setTimeout(() => (successMsg.value = ''), 2500)
 }
 
+async function makeExtraDeposit() {
+  const amount = Number(extraAmount.value)
+  if (isNaN(amount) || amount <= 0) {
+    return
+  }
+  const description = extraDescription.value.trim() || 'Extra insättning'
+  await allowance.depositExtra(amount, description)
+  extraAmount.value = ''
+  extraDescription.value = ''
+  successMsg.value = t('admin.success')
+  setTimeout(() => (successMsg.value = ''), 2500)
+}
+
 async function resetTimer() {
   allowance.resetWeeklyTimer()
   successMsg.value = t('admin.resetSuccess')
@@ -76,8 +93,35 @@ async function resetTimer() {
 }
 
 async function handleLogout() {
-  await authStore.logout()
   router.push('/login')
+}
+
+async function handleResetCache() {
+  if (!confirm(t('admin.resetCacheConfirm'))) return
+  
+  successMsg.value = t('admin.resetCacheSuccess')
+  
+  try {
+    // Clear Cache API
+    if ('caches' in window) {
+      const cacheNames = await caches.keys()
+      await Promise.all(cacheNames.map(name => caches.delete(name)))
+    }
+    
+    // Unregister Service Workers
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      await Promise.all(registrations.map(r => r.unregister()))
+    }
+    
+    // Reload
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
+  } catch (err) {
+    console.error('Failed to reset cache:', err)
+    window.location.reload()
+  }
 }
 </script>
 
@@ -131,7 +175,7 @@ async function handleLogout() {
         <div class="grid grid-cols-3 gap-3">
           <div v-for="b in bucketOptions" :key="b.key" class="text-center">
             <div class="text-2xl mb-1">{{ b.emoji }}</div>
-            <div class="text-xl font-black text-white tabular-nums">{{ allowance.buckets[b.key] }}</div>
+            <div class="text-xl font-black text-white tabular-nums">{{ allowance.buckets[b.key].toFixed(2) }}</div>
             <div class="text-xs text-white/50 font-medium">kr</div>
             <div class="text-xs text-purple-300">{{ b.label }}</div>
           </div>
@@ -157,6 +201,7 @@ async function handleLogout() {
                 v-model.number="editBalances[b.key]"
                 type="number"
                 min="0"
+                step="0.01"
                 class="w-full rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/30 px-4 py-3 pr-10 font-bold text-lg focus:outline-none focus:border-purple-400 transition"
               />
               <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-medium pointer-events-none">kr</span>
@@ -171,6 +216,48 @@ async function handleLogout() {
           class="w-full py-3 rounded-2xl bg-purple-500 text-white font-bold hover:bg-purple-600 active:scale-95 transition-all"
         >
           💾 {{ t('admin.saveChanges') }}
+        </button>
+      </div>
+
+      <!-- Extra Deposit -->
+      <div class="rounded-3xl bg-white/10 backdrop-blur border border-white/10 p-5">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-purple-300 mb-4">{{ t('admin.extraDeposit') }}</h2>
+
+        <div class="flex flex-col gap-3 mb-4">
+          <div class="flex items-center gap-3">
+            <label for="extra-amount" class="w-24 text-sm font-semibold text-white/70">{{ t('admin.extraAmount') }}</label>
+            <div class="relative flex-1">
+              <input
+                id="extra-amount"
+                v-model.number="extraAmount"
+                type="number"
+                min="0.01"
+                step="0.01"
+                :placeholder="t('admin.extraAmountPlaceholder')"
+                class="w-full rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/30 px-4 py-3 pr-10 font-bold text-lg focus:outline-none focus:border-purple-400 transition"
+              />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-medium pointer-events-none">kr</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <label for="extra-description" class="w-24 text-sm font-semibold text-white/70">{{ t('admin.extraDescription') }}</label>
+            <input
+              id="extra-description"
+              v-model="extraDescription"
+              type="text"
+              :placeholder="t('admin.extraDescriptionPlaceholder')"
+              class="flex-1 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/30 px-4 py-3 font-bold text-lg focus:outline-none focus:border-purple-400 transition"
+            />
+          </div>
+        </div>
+
+        <button
+          id="admin-extra-deposit-btn"
+          @click="makeExtraDeposit"
+          :disabled="!extraAmount || Number(extraAmount) <= 0"
+          class="w-full py-3 rounded-2xl bg-green-500 text-white font-bold hover:bg-green-600 disabled:bg-gray-500 disabled:cursor-not-allowed active:scale-95 transition-all"
+        >
+          💰 {{ t('admin.makeExtraDeposit') }}
         </button>
       </div>
 
@@ -202,6 +289,7 @@ async function handleLogout() {
               v-model.number="allowance.donationThreshold"
               type="number"
               min="1"
+              step="0.01"
               @change="allowance.persist()"
               class="w-full rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/30 px-4 py-3 pr-10 font-bold text-lg focus:outline-none focus:border-purple-400 transition"
               :placeholder="t('admin.donationGoalPlaceholder')"
@@ -212,13 +300,23 @@ async function handleLogout() {
       </div>
 
       <!-- Reset timer -->
-      <button
-        id="admin-reset-timer"
-        @click="resetTimer"
-        class="w-full py-4 rounded-3xl bg-white/10 border border-white/20 text-white font-semibold hover:bg-white/20 active:scale-95 transition-all"
-      >
-        🔄 {{ t('admin.resetTimer') }}
-      </button>
+      <div class="grid grid-cols-1 gap-3">
+        <button
+          id="admin-reset-timer"
+          @click="resetTimer"
+          class="w-full py-4 rounded-3xl bg-white/10 border border-white/20 text-white font-semibold hover:bg-white/20 active:scale-95 transition-all"
+        >
+          🔄 {{ t('admin.resetTimer') }}
+        </button>
+
+        <button
+          id="admin-reset-cache"
+          @click="handleResetCache"
+          class="w-full py-4 rounded-3xl bg-white/10 border border-white/20 text-white/60 text-sm font-semibold hover:bg-white/20 hover:text-white active:scale-95 transition-all"
+        >
+          🧹 {{ t('admin.resetCache') }}
+        </button>
+      </div>
 
       <!-- Logout -->
       <button

@@ -143,6 +143,29 @@ export const useAllowanceStore = defineStore('allowance', () => {
     persist()
   }
 
+  async function depositExtra(amount: number, description: string) {
+    // Distribute extra deposit in same proportion as weekly: 40:10:10
+    const spendAmount = Math.round((amount * 40) / 60 * 100) / 100
+    const giveAmount = Math.round((amount * 10) / 60 * 100) / 100
+    const saveAmount = Math.round((amount * 10) / 60 * 100) / 100
+
+    buckets.value.spend += spendAmount
+    buckets.value.give += giveAmount
+    buckets.value.save += saveAmount
+
+    const now = new Date().toISOString()
+    const tx: Transaction = {
+      id: crypto.randomUUID(),
+      date: now,
+      description,
+      amount,
+      bucket: 'spend', // representative; split implied
+      note: `Extra deposit: ${spendAmount} spend, ${giveAmount} give, ${saveAmount} save`,
+    }
+    transactions.value.unshift(tx)
+    persist()
+  }
+
   async function adjustBucket(
     bucket: BucketType,
     amount: number,
@@ -207,6 +230,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
     totalBalance,
     load,
     depositWeekly,
+    depositExtra,
     adjustBucket,
     resetWeeklyTimer,
     shouldDepositThisWeek,

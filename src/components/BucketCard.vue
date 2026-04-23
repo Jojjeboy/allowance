@@ -72,7 +72,7 @@ const c = computed(() => config[props.bucket])
     <!-- Balance -->
     <div class="relative">
       <div class="text-4xl font-black tracking-tight tabular-nums leading-none">
-        {{ balance.toFixed(0) }}
+        {{ balance.toFixed(2) }}
         <span class="text-2xl font-bold opacity-80 ml-1">kr</span>
       </div>
       <div class="text-sm opacity-70 mt-1 font-medium">
