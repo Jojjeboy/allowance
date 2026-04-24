@@ -5,7 +5,7 @@ import { useAllowanceStore } from '@/stores/allowance'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import { useWeeklyDeposit } from '@/composables/useWeeklyDeposit'
-import { useRouter } from 'vue-router'
+                                                                                                                                                                                                                                      import { useRouter } from 'vue-router'
 import BucketCard from '@/components/BucketCard.vue'
 
 const { t } = useI18n()

@@ -11,7 +11,9 @@ const allowanceStore = useAllowanceStore()
 const dreamsStore = useDreamsStore()
 const authStore = useAuthStore()
 
-const showNav = computed(() => !['login'].includes(route.name as string))
+const showNav = computed(() =>
+  !['login', 'admin'].includes(route.name as string) && !authStore.isParent
+)
 
 // Load data once user is authenticated
 watch(

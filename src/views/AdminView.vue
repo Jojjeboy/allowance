@@ -104,13 +104,10 @@ async function handleResetCache() {
         <h1 class="text-2xl font-black text-white">{{ t('admin.title') }}</h1>
         <p class="text-sm text-purple-400 mt-0.5">{{ authStore.user?.email }}</p>
       </div>
-      <button
-        @click="router.push('/')"
-        class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-        aria-label="Tillbaka"
-      >
-        ←
-      </button>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-purple-500/20 border border-purple-400/30">
+        <span class="text-sm">🛡️</span>
+        <span class="text-xs font-bold uppercase tracking-wider text-purple-300">Förälder</span>
+      </div>
     </div>
 
     <!-- Admin panel (always visible — parent is authenticated via Google) -->

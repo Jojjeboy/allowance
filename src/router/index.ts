@@ -56,10 +56,14 @@ router.beforeEach(async (to, _from, next) => {
   if (!isPublic && !isAuthenticated) {
     next('/login')
   } else if (isPublic && isAuthenticated) {
-    next('/')
+    // Parents go straight to admin, children go to dashboard
+    next(authStore.isParent ? '/admin' : '/')
   } else if (to.meta.requiresParent && !authStore.isParent) {
     // Non-parent tried to access an admin-only route — send them home
     next('/')
+  } else if (authStore.isParent && to.name !== 'admin' && to.name !== 'login') {
+    // Parent tried to access a child-facing route — send them to admin
+    next('/admin')
   } else {
     next()
   }
