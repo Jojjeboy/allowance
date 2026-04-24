@@ -5,14 +5,21 @@ import { useAllowanceStore } from '@/stores/allowance'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import { useWeeklyDeposit } from '@/composables/useWeeklyDeposit'
+import { useRouter } from 'vue-router'
 import BucketCard from '@/components/BucketCard.vue'
 
 const { t } = useI18n()
 const allowance = useAllowanceStore()
 const authStore = useAuthStore()
 const theme = useThemeStore()
+const router = useRouter()
 
 useWeeklyDeposit()
+
+async function handleLogout() {
+  await authStore.logout()
+  router.push('/login')
+}
 
 const greeting = computed(() => {
   if (authStore.isParent) return '🛡️ Hej, förälder!'
@@ -140,6 +147,16 @@ const paydayLabel = computed(() => {
       <span class="text-xl font-black text-purple-700 dark:text-purple-300 tabular-nums">
         {{ allowance.totalBalance.toFixed(2) }} kr
       </span>
+    </div>
+
+    <!-- Logout button -->
+    <div class="px-5 mt-8 mb-4">
+      <button
+        @click="handleLogout"
+        class="w-full py-4 rounded-3xl bg-white/40 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-sm font-bold hover:bg-white/60 dark:hover:bg-gray-800/60 transition-all active:scale-95"
+      >
+        {{ t('admin.logout') }}
+      </button>
     </div>
   </div>
 </template>
