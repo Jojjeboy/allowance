@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { auth } from '@/firebase'
 import {
@@ -9,9 +9,18 @@ import {
   type User,
 } from 'firebase/auth'
 
+const PARENT_UID = import.meta.env.VITE_PARENT_UID as string
+const CHILD_UID = import.meta.env.VITE_CHILD_UID as string
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const loading = ref(true)
+
+  /** True when the logged-in user is the designated parent/admin account */
+  const isParent = computed(() => !!user.value && user.value.uid === PARENT_UID)
+
+  /** True when the logged-in user is the child account */
+  const isChild = computed(() => !!user.value && user.value.uid === CHILD_UID)
 
   // Initialize auth listener
   const initAuth = () => {
@@ -33,5 +42,5 @@ export const useAuthStore = defineStore('auth', () => {
     await signOut(auth)
   }
 
-  return { user, loading, initAuth, loginWithGoogle, logout }
+  return { user, loading, isParent, isChild, initAuth, loginWithGoogle, logout }
 })

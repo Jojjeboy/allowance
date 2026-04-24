@@ -8,6 +8,9 @@ import {
   Timestamp,
 } from 'firebase/firestore'
 
+// Always target the child's document — parent reads/writes the same data
+const CHILD_UID = import.meta.env.VITE_CHILD_UID as string
+
 export type BucketType = 'spend' | 'give' | 'save'
 
 export interface Transaction {
@@ -40,7 +43,9 @@ function uid(): string {
 }
 
 function docRef() {
-  return doc(db, 'allowance', uid())
+  // Use the fixed child UID so both child and parent accounts share the same document.
+  // Falls back to the current user's UID when VITE_CHILD_UID is not set (local dev).
+  return doc(db, 'allowance', CHILD_UID || uid())
 }
 
 function loadLocal<T>(key: string, fallback: T): T {

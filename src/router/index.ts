@@ -32,7 +32,7 @@ const router = createRouter({
       path: '/admin',
       name: 'admin',
       component: () => import('../views/AdminView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresParent: true },
     },
     {
       path: '/login',
@@ -56,6 +56,9 @@ router.beforeEach(async (to, _from, next) => {
   if (!isPublic && !isAuthenticated) {
     next('/login')
   } else if (isPublic && isAuthenticated) {
+    next('/')
+  } else if (to.meta.requiresParent && !authStore.isParent) {
+    // Non-parent tried to access an admin-only route — send them home
     next('/')
   } else {
     next()

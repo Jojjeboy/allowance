@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAllowanceStore, type BucketType } from '@/stores/allowance'
 import { useAuthStore } from '@/stores/auth'
@@ -10,38 +10,17 @@ const allowance = useAllowanceStore()
 const authStore = useAuthStore()
 const router = useRouter()
 
-// PIN protection (separate from Google Auth — admin page PIN)
-const ADMIN_PIN = '1234' // Change this or move to env
-const pinInput = ref('')
-const pinError = ref(false)
-const unlocked = ref(false)
-
-function submitPin() {
-  if (pinInput.value === ADMIN_PIN) {
-    unlocked.value = true
-    pinError.value = false
-  } else {
-    pinError.value = true
-    pinInput.value = ''
-  }
-}
-
-// Watch for the panel opening so we can seed the input values
-watch(unlocked, (val) => { if (val) initEditBalances() })
-
-// Adjust form — one input per bucket, pre-filled with current balance
+// Seed input values from current balances
 const bucketOptions: { key: BucketType; label: string; emoji: string }[] = [
   { key: 'spend', label: 'Spendera', emoji: '🛍️' },
   { key: 'give', label: 'Ge bort', emoji: '🎁' },
   { key: 'save', label: 'Spara', emoji: '🏦' },
 ]
 
-// Local editable copies, initialised once the panel opens
 const editBalances = ref<Record<BucketType, number | ''>>({ spend: '', give: '', save: '' })
 const adjustNote = ref('')
 const successMsg = ref('')
 
-// Extra deposit form
 const extraAmount = ref('')
 const extraDescription = ref('')
 
@@ -54,6 +33,8 @@ function initEditBalances() {
     save: allowance.buckets.save,
   }
 }
+
+onMounted(() => initEditBalances())
 
 async function saveBalances() {
   for (const b of bucketOptions) {
@@ -75,9 +56,7 @@ async function saveBalances() {
 
 async function makeExtraDeposit() {
   const amount = Number(extraAmount.value)
-  if (isNaN(amount) || amount <= 0) {
-    return
-  }
+  if (isNaN(amount) || amount <= 0) return
   const description = extraDescription.value.trim() || 'Extra insättning'
   await allowance.depositExtra(amount, description)
   extraAmount.value = ''
@@ -93,31 +72,23 @@ async function resetTimer() {
 }
 
 async function handleLogout() {
+  await authStore.logout()
   router.push('/login')
 }
 
 async function handleResetCache() {
   if (!confirm(t('admin.resetCacheConfirm'))) return
-  
   successMsg.value = t('admin.resetCacheSuccess')
-  
   try {
-    // Clear Cache API
     if ('caches' in window) {
       const cacheNames = await caches.keys()
       await Promise.all(cacheNames.map(name => caches.delete(name)))
     }
-    
-    // Unregister Service Workers
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations()
       await Promise.all(registrations.map(r => r.unregister()))
     }
-    
-    // Reload
-    setTimeout(() => {
-      window.location.reload()
-    }, 1000)
+    setTimeout(() => { window.location.reload() }, 1000)
   } catch (err) {
     console.error('Failed to reset cache:', err)
     window.location.reload()
@@ -142,33 +113,8 @@ async function handleResetCache() {
       </button>
     </div>
 
-    <!-- PIN gate -->
-    <div v-if="!unlocked" class="flex flex-col items-center justify-center min-h-[60vh] gap-6">
-      <div class="text-6xl">🔐</div>
-      <h2 class="text-xl font-bold text-white">{{ t('admin.pinPrompt') }}</h2>
-      <input
-        id="admin-pin-input"
-        v-model="pinInput"
-        type="password"
-        inputmode="numeric"
-        maxlength="4"
-        :placeholder="t('admin.pinPlaceholder')"
-        class="w-48 text-center text-3xl tracking-[0.5em] rounded-2xl border-2 py-4 bg-white/10 text-white placeholder-white/30 focus:outline-none focus:border-purple-400 transition-colors"
-        :class="pinError ? 'border-red-500' : 'border-white/20'"
-        @keyup.enter="submitPin"
-      />
-      <p v-if="pinError" class="text-red-400 text-sm font-semibold">{{ t('admin.pinError') }}</p>
-      <button
-        id="admin-pin-submit"
-        @click="submitPin"
-        class="px-8 py-3 rounded-2xl bg-purple-500 text-white font-bold hover:bg-purple-600 active:scale-95 transition-all"
-      >
-        {{ t('admin.pinSubmit') }}
-      </button>
-    </div>
-
-    <!-- Admin panel -->
-    <div v-else class="flex flex-col gap-5">
+    <!-- Admin panel (always visible — parent is authenticated via Google) -->
+    <div class="flex flex-col gap-5">
       <!-- Current balances -->
       <div class="rounded-3xl bg-white/10 backdrop-blur border border-white/10 p-5">
         <h2 class="text-xs font-bold uppercase tracking-widest text-purple-300 mb-4">{{ t('admin.currentBalances') }}</h2>
