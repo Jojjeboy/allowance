@@ -7,10 +7,10 @@ service cloud.firestore {
       // Child can read their own document (read-only — writes go via parent)
       allow read: if request.auth != null && request.auth.uid == docId;
 
-      // Parent can read AND write the child's document
-      // Replace the UID string below with your actual parent UID
+      // Parents can read AND write the child's document
+      // Replace the UID strings below with your actual parent UIDs
       allow read, write: if request.auth != null
-        && request.auth.uid == "qLzqT8HLNCN9FSVWZESZthP1DaJ3";
+        && request.auth.uid in ["qLzqT8HLNCN9FSVWZESZthP1DaJ3", "KveGzOt05sWVm8DvO1sBpyxg3z52"];
     }
 
     // Deny everything else by default

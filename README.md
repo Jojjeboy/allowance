@@ -7,49 +7,66 @@ En premium, mobil-först Progressive Web App (PWA) designad för att göra hante
 ## 🌟 Upplevelsen
 
 ### För barnet (Lia)
+
 Appen är designad för att vara färgstark, interaktiv och uppmuntrande:
 
-*   **De tre hinkarna**: 
-    *   🛍️ **Spendera**: Pengar för veckans nöjen och godsaker.
-    *   🎁 **Ge bort**: Pengar för att hjälpa andra (t.ex. Hundstallet, WWF, Barncancerfonden).
-    *   🏦 **Spara**: Pengar som läggs undan för långsiktiga sparmål.
-*   **Automatisk lönedag**: Varje fredag kl. 16:00 sätter appen automatiskt in veckopengen (60 kr uppdelat som 40/10/10) med en firande animation.
-*   **Drömmål**: Skapa "Drömmar" med egna bilder och målsättningar. Se framstegsmätaren fyllas i takt med att **Spara**-hinken växer.
-*   **Hjältedonations**: När **Ge bort**-hinken når 100 kr låses en speciell donationsknapp upp med beskrivningar av vilken skillnad pengarna gör för den valda välgörenhetsorganisationen.
-*   **Visuell glädje**: Konfettiregn vid lönedag, bekräftade donationer och när ett drömmål nås till 100%.
-*   **Fullständig historik**: En skrollbar lista över alla transaktioner grupperade per vecka.
-*   **Mörkt läge**: En snygg inställning för användning under kvällstid.
+- **De tre hinkarna**:
+  - 🛍️ **Spendera**: Pengar för veckans nöjen och godsaker.
+  - 🎁 **Ge bort**: Pengar för att hjälpa andra (t.ex. Hundstallet, WWF, Barncancerfonden).
+  - 🏦 **Spara**: Pengar som läggs undan för långsiktiga sparmål.
+- **Automatisk lönedag**: Varje fredag kl. 16:00 sätter appen automatiskt in veckopengen (60 kr uppdelat som 40/10/10) med en firande animation.
+- **Drömmål**: Skapa "Drömmar" med egna bilder och målsättningar. Se framstegsmätaren fyllas i takt med att **Spara**-hinken växer.
+- **Hjältedonations**: När **Ge bort**-hinken når 100 kr låses en speciell donationsknapp upp med beskrivningar av vilken skillnad pengarna gör för den valda välgörenhetsorganisationen.
+- **Visuell glädje**: Konfettiregn vid lönedag, bekräftade donationer och när ett drömmål nås till 100%.
+- **Fullständig historik**: En skrollbar lista över alla transaktioner grupperade per vecka.
+- **Mörkt läge**: En snygg inställning för användning under kvällstid.
 
 ### För föräldern
-Föräldern behåller kontrollen genom ett dolt admin-gränssnitt:
 
-*   **Dolt admin-tillträde**: Nås via `/admin`-routen eller kugghjulsikonen i instrumentpanelen.
-*   **PIN-skydd**: Skyddas av en enkel 4-siffrig PIN-kod (`1234` som standard) för att förhindra oavsiktliga ändringar.
-*   **Justering av saldo**: Lägg till eller dra av pengar manuellt från valfri hink (t.ex. vid utförda sysslor eller större inköp).
-*   **Återställ timer**: Återställ veckotimern vid behov för testning eller manuell synkronisering.
+Föräldern har ett eget administrativt konto och behåller kontrollen genom ett eget admin-gränssnitt:
+
+- **Separat inloggning**: Både barn och förälder loggar in säkert via Google (Single Sign-On). Appen identifierar vem som loggar in.
+- **Admin-tillträde**: Nås via en kugghjulsikon i instrumentpanelen som endast visas för det inloggade föräldrakontot.
+- **Justering av saldo**: Lägg till eller dra av pengar manuellt från valfri hink (t.ex. vid utförda sysslor eller större inköp).
+- **Hantera inställningar**: Ställ in vilken dag i veckan lönen ska betalas ut och justera hur mycket pengar som krävs för att låsa upp donationer.
+- **Återställ timer**: Återställ veckotimern vid behov för testning eller manuell synkronisering.
+
+### 👨‍💻 För utvecklare: Förälder/Barn-funktionalitet
+
+Appen använder en rollbaserad arkitektur kopplad till Firebase Authentication. Om du behöver uppdatera koden manuellt eller ändra vilka konton som används, fungerar det så här:
+
+1.  **Firebase & Google Auth (`auth.ts`)**: Inloggningen använder `signInWithPopup` via Google. Inga lösenord sparas.
+2.  **Miljövariabler (`.env`)**: I filen `.env` lagras variablerna `VITE_PARENT_UID` och `VITE_CHILD_UID`. Dessa pekar på de unika användar-ID (UID) som Firebase genererar för respektive Google-konto.
+3.  **Roll-identifiering**: I filen `src/stores/auth.ts` finns logiken som jämför den inloggade användarens UID med de angivna variablerna och sätter properties som `isParent` och `isChild`.
+4.  **Säkerhet (Router Guard)**: I filen `src/router/index.ts` skyddas admin-vyn av ett `requiresParent`-villkor. En användare utan föräldrarollen omdirigeras automatiskt till startsidan.
+5.  **Uppdatera manuellt & Flera föräldrar**: Du uppdaterar konton genom att ändra `VITE_PARENT_UID` och/eller `VITE_CHILD_UID` i `.env`-filen. **För att lägga till flera föräldrar**, separera deras UID med ett kommatecken i `VITE_PARENT_UID` (exempelvis: `VITE_PARENT_UID=uid1,uid2`). Kom ihåg att bygga om appen samt uppdatera `firestore.rules` (med en array `in ["uid1", "uid2"]`) efter ändringen!
 
 ---
 
 ## 🏗️ Teknisk arkitektur
 
 ### Teknikstack
--   **Frontend**: [Vue 3](https://vuejs.org/) (Composition API) + [Vite](https://vitejs.dev/)
--   **Styling**: [Tailwind CSS v3](https://tailwindcss.com/)
--   **Tillstånd (State)**: [Pinia](https://pinia.vuejs.org/) med modulär butiksstruktur
--   **Backend**: [Firebase Firestore](https://firebase.google.com/docs/firestore) för data & [Auth](https://firebase.google.com/docs/auth) för säkerhet
--   **Persistens**: [VueUse](https://vueuse.org/) `useLocalStorage` för robust offline-stöd
--   **PWA**: [Vite PWA Plugin](https://vite-pwa-org.netlify.app/) för installerbarhet och service workers
--   **Animationer**: [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
--   **Lokalisering**: [vue-i18n](https://vue-i18n.intlify.dev/) (Svenska som modersmål)
+
+- **Frontend**: [Vue 3](https://vuejs.org/) (Composition API) + [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS v3](https://tailwindcss.com/)
+- **Tillstånd (State)**: [Pinia](https://pinia.vuejs.org/) med modulär butiksstruktur
+- **Backend**: [Firebase Firestore](https://firebase.google.com/docs/firestore) för data & [Auth](https://firebase.google.com/docs/auth) för säkerhet
+- **Persistens**: [VueUse](https://vueuse.org/) `useLocalStorage` för robust offline-stöd
+- **PWA**: [Vite PWA Plugin](https://vite-pwa-org.netlify.app/) för installerbarhet och service workers
+- **Animationer**: [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
+- **Lokalisering**: [vue-i18n](https://vue-i18n.intlify.dev/) (Svenska som modersmål)
 
 ### Butiksstruktur (Stores)
--   `allowance.ts`: Hanterar saldon i hinkar, transaktioner och logik för insättningar.
--   `dreams.ts`: Hanterar sparmål och bilddata (lagras som base64).
--   `theme.ts`: Hanterar persistens för ljust/mörkt läge.
--   `auth.ts`: Hanterar Firebase-inloggning.
+
+- `allowance.ts`: Hanterar saldon i hinkar, transaktioner och logik för insättningar.
+- `dreams.ts`: Hanterar sparmål och bilddata (lagras som base64).
+- `theme.ts`: Hanterar persistens för ljust/mörkt läge.
+- `auth.ts`: Hanterar Firebase-inloggning.
 
 ### Strategi för synkronisering
+
 Appen använder en **Write-Through Cache**-strategi:
+
 1.  Allt tillstånd sparas omedelbart i `localStorage` för omedelbar respons offline.
 2.  Asynkron synkronisering till Firestore sker i bakgrunden.
 3.  Vid appstart laddas data först från `localStorage` (snabbt), och uppdateras sedan från Firestore (pålitligt).
@@ -59,47 +76,57 @@ Appen använder en **Write-Through Cache**-strategi:
 ## 🚀 Installation & Utveckling
 
 ### Förutsättningar
--   Node.js (v20+ rekommenderas)
--   Ett Firebase-projekt
+
+- Node.js (v20+ rekommenderas)
+- Ett Firebase-projekt
 
 ### Installation
+
 1.  Klona lagringsplatsen och installera beroenden:
     ```sh
     npm install
     ```
-2.  **Firebase-konfiguration**: 
-    -   Kopiera ditt konfigurationsobjekt från Firebase Console.
-    -   Klistra in det i `scripts/pasted_secret_config.js`.
-    -   Kör hjälpskriptet för att generera `.env`-filen:
-        ```sh
-        npm run generate-env
-        ```
+2.  **Firebase-konfiguration**:
+    - Kopiera ditt konfigurationsobjekt från Firebase Console.
+    - Klistra in det i `scripts/pasted_secret_config.js`.
+    - Kör hjälpskriptet för att generera `.env`-filen:
+      ```sh
+      npm run generate-env
+      ```
 
 ### Utveckling
+
 ```sh
 npm run dev
 ```
 
 ### Testning & Validering
+
 Projektet använder en strikt valideringspipeline:
+
 ```sh
 npm run validate   # Kör Lint -> Type-check -> Unit Tests -> Build
 ```
--   **Enhetstester**: `npm run test:unit` (Vitest). Inkluderar fullständiga mockar för Firebase och tidskritisk logik för insättningar.
--   **Typ-kontroll**: `npm run type-check` (vue-tsc).
--   **Linting**: `npm run lint` (ESLint).
+
+- **Enhetstester**: `npm run test:unit` (Vitest). Inkluderar fullständiga mockar för Firebase och tidskritisk logik för insättningar.
+- **Typ-kontroll**: `npm run type-check` (vue-tsc).
+- **Linting**: `npm run lint` (ESLint).
 
 ---
 
 ## 🔮 Framtida planer & idéer
 
-*   **Sysslosystem**: En dedikerad flik för "Uppgifter" där Lia kan tjäna extra pengar genom att slutföra överenskomna sysslor hemma.
-*   **Ränta**: Små månatliga "räntebonusar" i **Spara**-hinken för att lära ut kraften i ränta-på-ränta.
-*   **Fotogalleri**: Ett sätt att arkivera uppfyllda drömmar med ett foto på den faktiska prylen när den väl är inköpt.
-*   **Rösthälsningar**: Integration med en lokal AI-modell för att ge uppmuntrande rösthälsningar eller "ekonomitips" med en rolig röst.
-*   **Budgetplanering**: Ett enkelt verktyg för att "öronmärka" pengar inom Spendera-hinken för specifika kommande händelser (t.ex. bio med kompisar).
-*   **Flera barn**: Möjlighet för föräldrar att växla mellan olika barnprofiler med separata saldon.
+- **Sysslosystem**: En dedikerad flik för "Uppgifter" där Lia kan tjäna extra pengar genom att slutföra överenskomna sysslor hemma.
+- **Ränta**: Små månatliga "räntebonusar" i **Spara**-hinken för att lära ut kraften i ränta-på-ränta.
+- **Fotogalleri**: Ett sätt att arkivera uppfyllda drömmar med ett foto på den faktiska prylen när den väl är inköpt.
+- **Rösthälsningar**: Integration med en lokal AI-modell för att ge uppmuntrande rösthälsningar eller "ekonomitips" med en rolig röst.
+- **Budgetplanering**: Ett enkelt verktyg för att "öronmärka" pengar inom Spendera-hinken för specifika kommande händelser (t.ex. bio med kompisar).
+- **Flera barn**: Möjlighet för föräldrar att växla mellan olika barnprofiler med separata saldon.
 
 ---
 
-*Skapad med ❤️ till Lia.*
+_Skapad med ❤️ till Lia._
+
+### Next prompt
+
+Also make it visible in the app that it is not a child whows using the app. The parent only needs to see the admin page

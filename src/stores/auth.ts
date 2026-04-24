@@ -9,15 +9,15 @@ import {
   type User,
 } from 'firebase/auth'
 
-const PARENT_UID = import.meta.env.VITE_PARENT_UID as string
+const PARENT_UIDS = (import.meta.env.VITE_PARENT_UID as string || '').split(',').map(uid => uid.trim())
 const CHILD_UID = import.meta.env.VITE_CHILD_UID as string
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const loading = ref(true)
 
-  /** True when the logged-in user is the designated parent/admin account */
-  const isParent = computed(() => !!user.value && user.value.uid === PARENT_UID)
+  /** True when the logged-in user is one of the designated parent/admin accounts */
+  const isParent = computed(() => !!user.value && PARENT_UIDS.includes(user.value.uid))
 
   /** True when the logged-in user is the child account */
   const isChild = computed(() => !!user.value && user.value.uid === CHILD_UID)
