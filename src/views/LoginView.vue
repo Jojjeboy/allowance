@@ -9,6 +9,9 @@ const authStore = useAuthStore()
 const router = useRouter()
 const loading = ref(false)
 
+const appVersion = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'unknown'
+const commitHash = typeof __COMMIT_HASH__ !== 'undefined' ? __COMMIT_HASH__ : 'unknown'
+
 async function signIn() {
   loading.value = true
   try {
@@ -23,7 +26,7 @@ async function signIn() {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-100 via-pink-50 to-yellow-50 dark:from-gray-950 dark:via-purple-950/30 dark:to-gray-950 p-8">
+  <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-100 via-pink-50 to-yellow-50 dark:from-gray-950 dark:via-purple-950/30 dark:to-gray-950 p-8 relative">
     <!-- Logo / Title -->
     <div class="text-center mb-10">
       <div class="text-7xl mb-4 animate-bounce-soft">💜</div>
@@ -57,5 +60,10 @@ async function signIn() {
       </svg>
       <span>{{ loading ? t('common.loading') : t('login.signInGoogle') }}</span>
     </button>
+
+    <!-- Version Info -->
+    <div class="absolute bottom-4 text-[10px] text-gray-400 dark:text-gray-500 font-mono tracking-widest uppercase">
+      v{{ appVersion }} ({{ commitHash }})
+    </div>
   </div>
 </template>
