@@ -13,12 +13,14 @@ export interface Dream {
 
 const LS_DREAMS = 'lia_dreams'
 
+const CHILD_UID = import.meta.env.VITE_CHILD_UID as string
+
 function uid(): string {
   return auth.currentUser?.uid ?? 'anonymous'
 }
 
 function dreamsDocRef() {
-  return doc(db, 'allowance', uid())
+  return doc(db, 'allowance', CHILD_UID || uid())
 }
 
 function loadLocal(): Dream[] {
