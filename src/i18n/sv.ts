@@ -106,7 +106,7 @@ export default {
     extraAmount: 'Belopp (kr)',
     extraAmountPlaceholder: 'T.ex. 30',
     extraDescription: 'Beskrivning',
-    extraDescriptionPlaceholder: 'T.ex. Extra för sysslor',
+    extraDescriptionPlaceholder: 'T.ex. Extra',
     makeExtraDeposit: 'Gör extra insättning',
     bucket: 'Hink',
     amount: 'Belopp (kr)',
