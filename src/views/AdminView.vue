@@ -299,6 +299,70 @@ async function handleResetCache() {
         </div>
       </div>
 
+      <!-- Weekly Amount Setting -->
+      <div class="rounded-3xl bg-white/10 backdrop-blur border border-white/10 p-5">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-purple-300 mb-4">{{ t('admin.weeklyAmountSetting') }}</h2>
+        
+        <div class="flex flex-col gap-4">
+          <!-- Spend -->
+          <div class="flex items-center gap-3">
+            <label for="admin-weekly-spend" class="w-24 text-sm font-semibold text-white/70">{{ t('admin.weeklySpendLabel') }}</label>
+            <div class="relative flex-1">
+              <input
+                id="admin-weekly-spend"
+                v-model.number="allowance.weeklySpendAmount"
+                type="number"
+                min="0"
+                step="1"
+                @change="allowance.persist()"
+                class="w-full rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/30 px-4 py-3 pr-10 font-bold text-lg focus:outline-none focus:border-purple-400 transition"
+              />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-medium pointer-events-none">kr</span>
+            </div>
+          </div>
+
+          <!-- Give -->
+          <div class="flex items-center gap-3">
+            <label for="admin-weekly-give" class="w-24 text-sm font-semibold text-white/70">{{ t('admin.weeklyGiveLabel') }}</label>
+            <div class="relative flex-1">
+              <input
+                id="admin-weekly-give"
+                v-model.number="allowance.weeklyGiveAmount"
+                type="number"
+                min="0"
+                step="1"
+                @change="allowance.persist()"
+                class="w-full rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/30 px-4 py-3 pr-10 font-bold text-lg focus:outline-none focus:border-purple-400 transition"
+              />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-medium pointer-events-none">kr</span>
+            </div>
+          </div>
+
+          <!-- Save -->
+          <div class="flex items-center gap-3">
+            <label for="admin-weekly-save" class="w-24 text-sm font-semibold text-white/70">{{ t('admin.weeklySaveLabel') }}</label>
+            <div class="relative flex-1">
+              <input
+                id="admin-weekly-save"
+                v-model.number="allowance.weeklySaveAmount"
+                type="number"
+                min="0"
+                step="1"
+                @change="allowance.persist()"
+                class="w-full rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/30 px-4 py-3 pr-10 font-bold text-lg focus:outline-none focus:border-purple-400 transition"
+              />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-medium pointer-events-none">kr</span>
+            </div>
+          </div>
+
+          <!-- Total (Read only) -->
+          <div class="mt-2 pt-4 border-t border-white/10 flex items-center justify-between">
+            <span class="text-sm font-bold text-purple-300 uppercase tracking-wider">{{ t('admin.weeklyAmountLabel') }}</span>
+            <span class="text-xl font-black text-white tabular-nums">{{ allowance.weeklyAmount }} kr</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Reset timer -->
       <div class="grid grid-cols-1 gap-3">
         <button

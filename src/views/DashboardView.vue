@@ -121,7 +121,7 @@ const paydayLabel = computed(() => {
             {{ t('dashboard.nextPayday') }}
           </p>
           <p class="text-sm font-bold text-purple-700 dark:text-purple-300">
-            {{ paydayLabel }} · {{ weekdayName }} · +60 kr
+            {{ paydayLabel }} · {{ weekdayName }} · +{{ allowance.weeklyAmount }} kr
           </p>
         </div>
         <router-link

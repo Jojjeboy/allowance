@@ -34,6 +34,9 @@ const LS_LAST_DEPOSIT = 'lia_last_deposit'
 const LS_START_DATE = 'lia_start_date'
 const LS_DEPOSIT_DAY = 'lia_deposit_day'
 const LS_DONATION_THRESHOLD = 'lia_donation_threshold'
+const LS_WEEKLY_SPEND = 'lia_weekly_spend'
+const LS_WEEKLY_GIVE = 'lia_weekly_give'
+const LS_WEEKLY_SAVE = 'lia_weekly_save'
 
 // Allowance starts from May 1st, 2026 on Saturdays
 const ALLOWANCE_START_DATE = '2026-05-01'
@@ -68,7 +71,12 @@ export const useAllowanceStore = defineStore('allowance', () => {
   const startDate = ref<string>(loadLocal(LS_START_DATE, ALLOWANCE_START_DATE))
   const depositDay = ref<number>(loadLocal(LS_DEPOSIT_DAY, 5)) // 0=Sun, 5=Fri
   const donationThreshold = ref<number>(loadLocal(LS_DONATION_THRESHOLD, 100))
+  const weeklySpendAmount = ref<number>(loadLocal(LS_WEEKLY_SPEND, 40))
+  const weeklyGiveAmount = ref<number>(loadLocal(LS_WEEKLY_GIVE, 10))
+  const weeklySaveAmount = ref<number>(loadLocal(LS_WEEKLY_SAVE, 10))
   const loading = ref(false)
+
+  const weeklyAmount = computed(() => weeklySpendAmount.value + weeklyGiveAmount.value + weeklySaveAmount.value)
 
   const totalBalance = computed(() => buckets.value.spend + buckets.value.give + buckets.value.save)
 
@@ -83,6 +91,9 @@ export const useAllowanceStore = defineStore('allowance', () => {
         startDate.value = data.startDate ?? ALLOWANCE_START_DATE
         depositDay.value = data.depositDay ?? 5
         donationThreshold.value = data.donationThreshold ?? 100
+        weeklySpendAmount.value = data.weeklySpendAmount ?? 40
+        weeklyGiveAmount.value = data.weeklyGiveAmount ?? 10
+        weeklySaveAmount.value = data.weeklySaveAmount ?? 10
         if (data.lastDeposit instanceof Timestamp) {
           lastDeposit.value = data.lastDeposit.toDate().toISOString()
         }
@@ -92,6 +103,9 @@ export const useAllowanceStore = defineStore('allowance', () => {
         saveLocal(LS_DEPOSIT_DAY, depositDay.value)
         saveLocal(LS_START_DATE, startDate.value)
         saveLocal(LS_DONATION_THRESHOLD, donationThreshold.value)
+        saveLocal(LS_WEEKLY_SPEND, weeklySpendAmount.value)
+        saveLocal(LS_WEEKLY_GIVE, weeklyGiveAmount.value)
+        saveLocal(LS_WEEKLY_SAVE, weeklySaveAmount.value)
       }
     } catch {
       // offline – use localStorage (already loaded above)
@@ -111,6 +125,9 @@ export const useAllowanceStore = defineStore('allowance', () => {
           startDate: startDate.value,
           depositDay: depositDay.value,
           donationThreshold: donationThreshold.value,
+          weeklySpendAmount: weeklySpendAmount.value,
+          weeklyGiveAmount: weeklyGiveAmount.value,
+          weeklySaveAmount: weeklySaveAmount.value,
         },
         { merge: true },
       )
@@ -126,13 +143,20 @@ export const useAllowanceStore = defineStore('allowance', () => {
     saveLocal(LS_START_DATE, startDate.value)
     saveLocal(LS_DEPOSIT_DAY, depositDay.value)
     saveLocal(LS_DONATION_THRESHOLD, donationThreshold.value)
+    saveLocal(LS_WEEKLY_SPEND, weeklySpendAmount.value)
+    saveLocal(LS_WEEKLY_GIVE, weeklyGiveAmount.value)
+    saveLocal(LS_WEEKLY_SAVE, weeklySaveAmount.value)
     syncFirestore()
   }
 
   async function depositWeekly() {
-    buckets.value.spend += 40
-    buckets.value.give += 10
-    buckets.value.save += 10
+    const spendAmount = weeklySpendAmount.value
+    const giveAmount = weeklyGiveAmount.value
+    const saveAmount = weeklySaveAmount.value
+
+    buckets.value.spend += spendAmount
+    buckets.value.give += giveAmount
+    buckets.value.save += saveAmount
 
     const now = new Date().toISOString()
     lastDeposit.value = now
@@ -141,7 +165,7 @@ export const useAllowanceStore = defineStore('allowance', () => {
       id: crypto.randomUUID(),
       date: now,
       description: 'Veckopeng',
-      amount: 60,
+      amount: weeklyAmount.value,
       bucket: 'spend', // representative; split implied
     }
     transactions.value.unshift(tx)
@@ -149,10 +173,11 @@ export const useAllowanceStore = defineStore('allowance', () => {
   }
 
   async function depositExtra(amount: number, description: string) {
-    // Distribute extra deposit in same proportion as weekly: 40:10:10
-    const spendAmount = Math.round((amount * 40) / 60 * 100) / 100
-    const giveAmount = Math.round((amount * 10) / 60 * 100) / 100
-    const saveAmount = Math.round((amount * 10) / 60 * 100) / 100
+    // Distribute extra deposit in same proportion as weekly settings
+    const totalWeekly = weeklyAmount.value || 1 // Avoid division by zero
+    const spendAmount = Math.round((amount * weeklySpendAmount.value) / totalWeekly * 100) / 100
+    const giveAmount = Math.round((amount * weeklyGiveAmount.value) / totalWeekly * 100) / 100
+    const saveAmount = Math.round((amount * weeklySaveAmount.value) / totalWeekly * 100) / 100
 
     buckets.value.spend += spendAmount
     buckets.value.give += giveAmount
@@ -231,6 +256,10 @@ export const useAllowanceStore = defineStore('allowance', () => {
     startDate,
     depositDay,
     donationThreshold,
+    weeklySpendAmount,
+    weeklyGiveAmount,
+    weeklySaveAmount,
+    weeklyAmount,
     loading,
     totalBalance,
     load,

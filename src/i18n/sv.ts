@@ -17,8 +17,8 @@ export default {
       give: 'Ge bort',
       save: 'Spara',
     },
-    weeklyAmount: '+60 kr varje fredag kl 16:00',
-    paydayBanner: '🎉 Veckopeng har kommit! +60 kr',
+    weeklyAmount: '+{amount} kr varje fredag kl 16:00',
+    paydayBanner: '🎉 Veckopeng har kommit! +{amount} kr',
   },
   dreams: {
     title: 'Drömfabriken ✨',
@@ -125,6 +125,12 @@ export default {
     donationGoal: 'Mål för donation',
     donationGoalLabel: 'Belopp (kr)',
     donationGoalPlaceholder: 'T.ex. 100',
+    weeklyAmountSetting: 'Veckopengens storlek',
+    weeklyAmountLabel: 'Totalbelopp (kr)',
+    weeklySpendLabel: 'Spendera (kr)',
+    weeklyGiveLabel: 'Ge bort (kr)',
+    weeklySaveLabel: 'Spara (kr)',
+    weeklyAmountPlaceholder: 'T.ex. 60',
     days: {
       0: 'Sön',
       1: 'Mån',
