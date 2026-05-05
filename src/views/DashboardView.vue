@@ -22,7 +22,6 @@ async function handleLogout() {
 }
 
 const greeting = computed(() => {
-  if (authStore.isParent) return '🛡️ Hej, förälder!'
   const hour = new Date().getHours()
   if (hour < 10) return '🌅 God morgon, Lia!'
   if (hour < 17) return '☀️ Hej Lia!'
@@ -126,7 +125,6 @@ const paydayLabel = computed(() => {
           </p>
         </div>
         <router-link
-          v-if="authStore.isParent"
           to="/admin"
           class="text-xs text-gray-300 dark:text-gray-600 hover:text-gray-400 transition-colors select-none"
           aria-label="Admin"

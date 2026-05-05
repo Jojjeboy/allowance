@@ -10,6 +10,10 @@ const allowance = useAllowanceStore()
 const authStore = useAuthStore()
 const router = useRouter()
 
+// PIN gate
+const pin = ref('')
+const pinError = ref(false)
+
 // Seed input values from current balances
 const bucketOptions: { key: BucketType; label: string; emoji: string }[] = [
   { key: 'spend', label: 'Spendera', emoji: '🛍️' },
@@ -34,7 +38,24 @@ function initEditBalances() {
   }
 }
 
-onMounted(() => initEditBalances())
+onMounted(() => {
+  if (authStore.isAdmin) {
+    initEditBalances()
+  }
+})
+
+function handlePinSubmit() {
+  if (authStore.enterAdmin(pin.value)) {
+    pinError.value = false
+    initEditBalances()
+  } else {
+    pinError.value = true
+    pin.value = ''
+    setTimeout(() => {
+      pinError.value = false
+    }, 2000)
+  }
+}
 
 async function saveBalances() {
   for (const b of bucketOptions) {
@@ -72,8 +93,8 @@ async function resetTimer() {
 }
 
 async function handleLogout() {
-  await authStore.logout()
-  router.push('/login')
+  authStore.exitAdmin()
+  router.push('/')
 }
 
 async function handleResetCache() {
@@ -104,14 +125,50 @@ async function handleResetCache() {
         <h1 class="text-2xl font-black text-white">{{ t('admin.title') }}</h1>
         <p class="text-sm text-purple-400 mt-0.5">{{ authStore.user?.email }}</p>
       </div>
-      <div class="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-purple-500/20 border border-purple-400/30">
+      <div v-if="authStore.isAdmin" class="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-purple-500/20 border border-purple-400/30">
         <span class="text-sm">🛡️</span>
         <span class="text-xs font-bold uppercase tracking-wider text-purple-300">Förälder</span>
       </div>
     </div>
 
-    <!-- Admin panel (always visible — parent is authenticated via Google) -->
-    <div class="flex flex-col gap-5">
+    <!-- PIN Gate -->
+    <div v-if="!authStore.isAdmin" class="flex flex-col items-center justify-center pt-20">
+      <div class="w-full max-w-sm rounded-3xl bg-white/10 backdrop-blur border border-white/10 p-8 text-center">
+        <div class="text-4xl mb-4">🔐</div>
+        <h2 class="text-xl font-bold text-white mb-6">{{ t('admin.pinPrompt') }}</h2>
+        
+        <input
+          v-model="pin"
+          type="password"
+          pattern="[0-9]*"
+          inputmode="numeric"
+          :placeholder="t('admin.pinPlaceholder')"
+          class="w-full text-center text-3xl tracking-[1em] font-black rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/20 px-4 py-4 mb-6 focus:outline-none focus:border-purple-400 transition"
+          @keyup.enter="handlePinSubmit"
+        />
+
+        <div v-if="pinError" class="text-red-400 font-bold mb-4 animate-shake">
+          {{ t('admin.pinError') }}
+        </div>
+
+        <button
+          @click="handlePinSubmit"
+          class="w-full py-4 rounded-2xl bg-purple-500 text-white font-bold hover:bg-purple-600 active:scale-95 transition-all"
+        >
+          {{ t('admin.pinSubmit') }}
+        </button>
+
+        <button
+          @click="router.push('/')"
+          class="w-full mt-4 py-2 text-white/50 text-sm font-semibold hover:text-white transition-colors"
+        >
+          Avbryt
+        </button>
+      </div>
+    </div>
+
+    <!-- Admin panel (visible after PIN) -->
+    <div v-else class="flex flex-col gap-5">
       <!-- Current balances -->
       <div class="rounded-3xl bg-white/10 backdrop-blur border border-white/10 p-5">
         <h2 class="text-xs font-bold uppercase tracking-widest text-purple-300 mb-4">{{ t('admin.currentBalances') }}</h2>
@@ -261,13 +318,13 @@ async function handleResetCache() {
         </button>
       </div>
 
-      <!-- Logout -->
+      <!-- Exit Admin -->
       <button
-        id="admin-logout"
+        id="admin-exit"
         @click="handleLogout"
         class="w-full py-4 rounded-3xl border border-white/10 text-white/40 text-sm font-semibold hover:text-white/70 hover:border-white/30 transition-all"
       >
-        {{ t('admin.logout') }}
+        Lämna föräldraläge
       </button>
 
       <!-- Success message -->
@@ -286,4 +343,15 @@ async function handleResetCache() {
 <style scoped>
 .toast-enter-active, .toast-leave-active { transition: all 0.3s ease; }
 .toast-enter-from, .toast-leave-to { opacity: 0; transform: translate(-50%, -16px); }
+
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
 </style>

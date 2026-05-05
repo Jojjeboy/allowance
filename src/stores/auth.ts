@@ -9,18 +9,15 @@ import {
   type User,
 } from 'firebase/auth'
 
-const PARENT_UIDS = (import.meta.env.VITE_PARENT_UID as string || '').split(',').map(uid => uid.trim())
-const CHILD_UID = import.meta.env.VITE_CHILD_UID as string
+const ADMIN_PIN = '2204'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const loading = ref(true)
+  const adminMode = ref(false)
 
-  /** True when the logged-in user is one of the designated parent/admin accounts */
-  const isParent = computed(() => !!user.value && PARENT_UIDS.includes(user.value.uid))
-
-  /** True when the logged-in user is the child account */
-  const isChild = computed(() => !!user.value && user.value.uid === CHILD_UID)
+  /** True when admin mode has been unlocked with the PIN code */
+  const isAdmin = computed(() => adminMode.value)
 
   // Initialize auth listener
   const initAuth = () => {
@@ -39,8 +36,23 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const logout = async () => {
+    adminMode.value = false
     await signOut(auth)
   }
 
-  return { user, loading, isParent, isChild, initAuth, loginWithGoogle, logout }
+  /** Attempt to enter admin mode with a PIN. Returns true on success. */
+  const enterAdmin = (pin: string): boolean => {
+    if (pin === ADMIN_PIN) {
+      adminMode.value = true
+      return true
+    }
+    return false
+  }
+
+  /** Exit admin mode and return to normal view */
+  const exitAdmin = () => {
+    adminMode.value = false
+  }
+
+  return { user, loading, isAdmin, initAuth, loginWithGoogle, logout, enterAdmin, exitAdmin }
 })

@@ -12,7 +12,7 @@ const dreamsStore = useDreamsStore()
 const authStore = useAuthStore()
 
 const showNav = computed(() =>
-  !['login', 'admin'].includes(route.name as string) && !authStore.isParent
+  !['login', 'admin'].includes(route.name as string)
 )
 
 // Load data once user is authenticated
